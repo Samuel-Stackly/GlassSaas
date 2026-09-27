@@ -137,6 +137,34 @@ wildcard with credentials" requirement).
 |---|---|
 | `VITE_API_URL` | Base API URL, e.g. `http://localhost:5000/api` (no hardcoded fallback in code) |
 
+## Deploying to Render and Vercel
+
+1. Push this repository to GitHub and create a Vercel project from it. Set
+  **Root Directory** to `client`, the build command to `npm run build`, and
+  the output directory to `dist`. Add `VITE_API_URL` as
+  `https://pulseboard-api.onrender.com/api` and deploy. This matches the
+  Render service name in `render.yaml`; if Render gives your service a
+  different hostname, update this variable and redeploy Vercel.
+2. In Render, choose **New > Blueprint** and select the repository. Render
+  reads `render.yaml` and creates the API service. Set `MONGO_URI` to your
+  MongoDB Atlas connection string and `CLIENT_URL` to the exact Vercel
+  production URL, including `https://` and with no trailing slash. Render
+  generates `JWT_SECRET` for you. Keep `NODE_ENV=production`.
+3. In MongoDB Atlas, allow the Render service to connect under **Network
+  Access**. Render's free service does not have a stable outbound IP, so
+  allowing `0.0.0.0/0` is the simplest option but permits connection attempts
+  from any IP; use strong database credentials and restrict access further
+  if your hosting plan provides stable outbound IPs.
+4. Confirm `https://<your-render-service>.onrender.com/health` returns
+  `{"status":"ok"}`. The API base URL is
+  `https://<your-render-service>.onrender.com/api`. Redeploy Vercel after
+  changing `VITE_API_URL`; Vite embeds it into the built files.
+
+The API uses credentialed CORS and an httpOnly auth cookie. The frontend URL
+must match exactly, and the API's production cookie is configured for HTTPS
+cross-site requests. Use the stable Vercel production domain for `CLIENT_URL`,
+not a temporary preview deployment URL.
+
 ## Scripts
 
 **`server/package.json`:** `npm run dev` (tsx watch), `npm run build`
