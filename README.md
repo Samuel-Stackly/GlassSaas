@@ -123,16 +123,14 @@ full reasoning.
 | `JWT_SECRET` | Long random string used to sign auth tokens — never commit a real value |
 | `JWT_EXPIRES_IN` | Token lifetime, e.g. `7d` |
 | `PORT` | API port (default `5000`) |
-| `CLIENT_URL` | Exact frontend origin for CORS — no wildcards, required for cookies to work |
+| `CLIENT_URL` | Optional exact frontend origin for CORS. Set it to the Vercel origin to allow browser requests from production. |
 | `NODE_ENV` | `development` or `production` — controls cookie `secure`/`sameSite` |
 | `MONGO_SRV_DNS_WORKAROUND` | Optional, dev-only — see Troubleshooting above. Default `false`. |
 
-`MONGO_URI`, `JWT_SECRET`, and `CLIENT_URL` are validated at startup
-(`server/src/config/env.ts`) — the server refuses to start with a clear
-error message if any are missing, rather than degrading silently (this
-matters most for `CLIENT_URL`: the `cors` package's default behavior for a
-missing `origin` is permissive, which would quietly defeat the "no
-wildcard with credentials" requirement).
+`MONGO_URI` and `JWT_SECRET` are required at startup. `CLIENT_URL` is
+optional so the Render API can be deployed before the Vercel site exists.
+While it is unset, CORS allows only the local development origins configured
+by the API; add the exact Vercel origin to enable production browser requests.
 
 **`client/.env`**
 
@@ -154,10 +152,12 @@ wildcard with credentials" requirement).
   `npm start`, and health check path `/health`. Choose the Free instance if
   desired.
 3. Add these environment variables in the Render service settings:
-   `MONGO_URI` (your MongoDB Atlas connection string), `JWT_SECRET` (a long,
-   random secret), `JWT_EXPIRES_IN=7d`, `NODE_ENV=production`, and
-   `CLIENT_URL` (the exact Vercel production URL, including `https://` and
-   with no trailing slash). Render provides the `PORT` variable automatically.
+  `MONGO_URI` (your MongoDB Atlas connection string), `JWT_SECRET` (a long,
+  random secret), `JWT_EXPIRES_IN=7d`, and `NODE_ENV=production`. Render
+  provides the `PORT` variable automatically. `CLIENT_URL` is optional for
+  the initial deployment; once Vercel is deployed, set it to the exact
+  production origin, including `https://` and with no trailing slash, then
+  redeploy the API to allow frontend requests.
 4. In MongoDB Atlas, allow the Render service to connect under **Network
   Access**. Render's free service does not have a stable outbound IP, so
   allowing `0.0.0.0/0` is the simplest option but permits connection attempts
@@ -219,9 +219,10 @@ confirm another user's project exists.
 - Dashboard metrics, monthly project activity, recent activity, and
   upcoming deadlines are loaded from the authenticated user's projects.
   The server aggregates dashboard data in one MongoDB `$facet` pipeline.
-- Authentication uses a JWT in an httpOnly cookie. The API requires an
-  exact `CLIENT_URL` and credentialed CORS; production cookies use HTTPS
-  cross-site settings.
+- Authentication uses a JWT in an httpOnly cookie. The API uses credentialed
+  CORS with an exact-origin allowlist; configure optional `CLIENT_URL` to
+  allow the deployed frontend. Production cookies use HTTPS cross-site
+  settings.
 - Project queries are scoped to the authenticated owner. A project ID alone
   never grants access to another user's project.
 - Passwords are hashed with bcryptjs. Its pure-JavaScript implementation
