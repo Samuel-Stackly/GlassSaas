@@ -14,7 +14,7 @@ interface LogoProps {
  * Geometric interlocking mark from the supplied reference: two rounded
  * chevrons — purple pointing right, cyan pointing left — meeting at the
  * center to read as a single bowtie/infinity-style symbol. Icon only, no
- * wordmark baked in (per the reference brief) — "PulseBoard" stays as
+ * wordmark baked in (per the reference brief) — "GlassSaaS" stays as
  * separate real text wherever this renders next to a label.
  */
 export function Logo({ size = 36, className = '', glow = false }: LogoProps) {
@@ -24,8 +24,8 @@ export function Logo({ size = 36, className = '', glow = false }: LogoProps) {
   // per-instance or the DOM ends up with duplicate ids, so each mount gets
   // its own suffix instead of a fixed string id.
   const uid = useId();
-  const purpleId = `pb-logo-purple-${uid}`;
-  const cyanId = `pb-logo-cyan-${uid}`;
+  const purpleId = `gs-logo-green-${uid}`;
+  const cyanId = `gs-logo-amber-${uid}`;
 
   return (
     <svg

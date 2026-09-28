@@ -68,7 +68,7 @@ export function Sidebar({ onNavigate, collapsed = false }: SidebarProps) {
               the requirement) but drops the wordmark text to save width. */}
           {!collapsed && (
             <div>
-              <p className="text-body-md font-semibold leading-tight text-fg-primary">PulseBoard</p>
+              <p className="text-body-md font-semibold leading-tight text-fg-primary">GlassSaaS</p>
               <p className="text-label-sm text-fg-secondary">Analytics</p>
             </div>
           )}

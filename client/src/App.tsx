@@ -13,7 +13,7 @@ function NotFound() {
       <p className="text-display-lg text-fg-primary">404</p>
       <p className="text-body-md text-fg-secondary">That page doesn't exist.</p>
       <Link to="/" className="text-body-sm font-medium text-brand-text hover:underline">
-        Back to PulseBoard
+        Back to GlassSaaS
       </Link>
     </div>
   );

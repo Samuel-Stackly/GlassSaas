@@ -38,7 +38,7 @@ const MONTH_LABELS = [
  * All aggregation happens in MongoDB via a single $facet pipeline —
  * we never pull every project into Node and reduce it in JS.
  *
- * NOTE on scope: PulseBoard's data model (per the FRD) is Users + Projects
+ * NOTE on scope: GlassSaaS's data model (per the FRD) is Users + Projects
  * only — there is no billing/subscription/support-ticket data. The
  * "Revenue & MRR" chart from the Figma reference is re-purposed here to
  * plot real project activity (created / completed / overdue per month)

@@ -28,6 +28,7 @@ interface StatDefinition {
    * their chips indistinguishable at a glance). */
   chipBg: string;
   chipFg: string;
+  tone: 'forest' | 'amber' | 'green' | 'red';
 }
 
 /**
@@ -49,6 +50,7 @@ function buildStatDefinitions(stats: DashboardStats): StatDefinition[] {
       insight: `${stats.newThisMonthDeltaPct >= 0 ? 'Up' : 'Down'} vs. last month`,
       chipBg: 'var(--background-info-tint)',
       chipFg: 'var(--foreground-info)',
+      tone: 'forest',
     },
     {
       label: 'In Progress',
@@ -58,6 +60,7 @@ function buildStatDefinitions(stats: DashboardStats): StatDefinition[] {
       insight: 'Share of active work currently in progress',
       chipBg: 'var(--background-cyan-tint)',
       chipFg: 'var(--foreground-cyan)',
+      tone: 'amber',
     },
     {
       label: 'Completed',
@@ -67,6 +70,7 @@ function buildStatDefinitions(stats: DashboardStats): StatDefinition[] {
       insight: 'Share of all projects marked done',
       chipBg: 'var(--background-success-tint)',
       chipFg: 'var(--foreground-success)',
+      tone: 'green',
     },
     {
       label: 'Overdue',
@@ -76,6 +80,7 @@ function buildStatDefinitions(stats: DashboardStats): StatDefinition[] {
       insight: 'Needs attention — past their due date',
       chipBg: 'var(--background-danger-tint)',
       chipFg: 'var(--foreground-danger)',
+      tone: 'red',
     },
   ];
 }
@@ -103,17 +108,21 @@ export function StatCardsRow({ status, stats, onRetry }: StatCardsProps) {
       {definitions.map((stat) => {
         const Icon = stat.icon;
         return (
-          <Card key={stat.label} className="min-w-0">
-            <div
-              aria-hidden="true"
-              className="flex h-10 w-10 items-center justify-center rounded-secondary"
-              style={{ background: stat.chipBg, color: stat.chipFg }}
-            >
-              <Icon size={20} />
+          <Card key={stat.label} data-tone={stat.tone} className="dashboard-stat-card min-w-0">
+            <div className="dashboard-stat-card__top">
+              <div>
+                <p className="dashboard-stat-card__label">{stat.label}</p>
+                <p className="dashboard-stat-card__value">{stat.value}</p>
+              </div>
+              <span
+                aria-hidden="true"
+                className="dashboard-stat-card__icon"
+                style={{ background: stat.chipBg, color: stat.chipFg }}
+              >
+                <Icon size={19} />
+              </span>
             </div>
-            <p className="mt-4 text-display-md text-fg-primary">{stat.value}</p>
-            <p className="text-body-sm text-fg-secondary">{stat.label}</p>
-            <div className="mt-3 flex items-center gap-2 text-label-sm text-fg-tertiary">
+            <div className="dashboard-stat-card__insight">
               <DeltaBadge value={stat.delta} />
               <span className="truncate">{stat.insight}</span>
             </div>

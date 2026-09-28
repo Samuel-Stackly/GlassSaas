@@ -1,9 +1,9 @@
-# PulseBoard
+# GlassSaaS
 
-A MERN-stack analytics/admin dashboard: authenticated users manage projects
-and see live stats, an activity chart, and status breakdowns derived from
-their own data. Design reference: the "Glass SaaS Dashboard" Figma
-community kit (glassmorphism, light/dark theme, purple accent).
+A MERN-stack project dashboard: authenticated users manage projects and see
+live metrics, activity, and upcoming deadlines based on their own data.
+The interface supports light and dark themes with a forest-green and amber
+palette.
 
 ## Tech stack
 
@@ -15,7 +15,7 @@ cookie), bcryptjs, dotenv, CORS, cookie-parser.
 ## Folder structure
 
 ```
-pulseboard/
+glasssaas/
 ├── client/
 │   ├── src/
 │   │   ├── components/
@@ -24,10 +24,8 @@ pulseboard/
 │   │   │   │                ThemeToggle, Container
 │   │   │   ├── auth/        ProtectedRoute
 │   │   │   ├── layout/      Sidebar, Topbar, DashboardShell, MobileDrawer
-│   │   │   ├── dashboard/   StatCardsRow, ClientSegmentation, FeatureUsage,
-│   │   │   │                CustomerSatisfaction, ConversionFunnel, SalesCycle,
-│   │   │   │                SupportTickets, RecentActivityTable,
-│   │   │   │                UpcomingDeadlines, AIInsightsPanel
+│   │   │   ├── dashboard/   DashboardGreeting, StatCardsRow,
+│   │   │   │                RecentActivityTable, UpcomingDeadlines
 │   │   │   ├── charts/      RevenueChart (Recharts ComposedChart)
 │   │   │   └── projects/    ProjectFormModal, ProjectListItem
 │   │   ├── pages/           Landing, Login, Register, Dashboard, Projects
@@ -35,7 +33,6 @@ pulseboard/
 │   │   ├── hooks/           useAuth, useTheme, useProjects, useDashboardSummary,
 │   │   │                    useDrawer, useMediaQuery
 │   │   ├── services/        api.ts (fetch wrapper), auth.ts, projects.ts, dashboard.ts
-│   │   ├── data/            mockDashboardData.ts (isolated demo data — see below)
 │   │   ├── types/           shared TS types matching the API contract
 │   │   ├── App.tsx, main.tsx, index.css
 │   ├── tailwind.config.ts, vite.config.ts, package.json
@@ -60,9 +57,13 @@ pulseboard/
 Requires Node.js ≥ 18 and a MongoDB connection string (local `mongod` or a
 free MongoDB Atlas M0 cluster).
 
+The environment examples use a local MongoDB URI and a dummy JWT secret.
+Replace the secret before using real accounts or data. Start MongoDB locally
+or set `MONGO_URI` to your Atlas connection string before starting the API.
+
 ```bash
 git clone <repo-url>
-cd pulseboard
+cd glasssaas
 ```
 
 **Server:**
@@ -85,10 +86,12 @@ npm run dev                # http://localhost:5173
 
 Either:
 - **Local:** install MongoDB Community Edition, run `mongod`, use
-  `MONGO_URI=mongodb://localhost:27017/pulseboard`.
+  `MONGO_URI=mongodb://127.0.0.1:27017/glasssaas`.
 - **Atlas (recommended, free tier):** create an M0 cluster, add a database
   user, add `0.0.0.0/0` to Network Access (fine for a take-home, not for
-  real production), and use the provided `mongodb+srv://...` string.
+  real production), and use the provided `mongodb+srv://...` string. URL-encode
+  reserved characters in the database password; for example, encode `@` as
+  `%40` so it is not parsed as part of the URI structure.
 
 ### Troubleshooting: `querySrv ECONNREFUSED` on Windows
 
@@ -142,20 +145,25 @@ wildcard with credentials" requirement).
 1. Push this repository to GitHub and create a Vercel project from it. Set
   **Root Directory** to `client`, the build command to `npm run build`, and
   the output directory to `dist`. Add `VITE_API_URL` as
-  `https://pulseboard-api.onrender.com/api` and deploy. This matches the
-  Render service name in `render.yaml`; if Render gives your service a
-  different hostname, update this variable and redeploy Vercel.
-2. In Render, choose **New > Blueprint** and select the repository. Render
-  reads `render.yaml` and creates the API service. Set `MONGO_URI` to your
-  MongoDB Atlas connection string and `CLIENT_URL` to the exact Vercel
-  production URL, including `https://` and with no trailing slash. Render
-  generates `JWT_SECRET` for you. Keep `NODE_ENV=production`.
-3. In MongoDB Atlas, allow the Render service to connect under **Network
+  `https://glasssaas-api.onrender.com/api` and deploy. This matches the
+  Render service name below. If you choose a different Render service name,
+  update this URL to match it and redeploy Vercel.
+2. In Render, choose **New > Web Service**, connect this repository, and
+  configure the service: name `glasssaas-api`, root directory `server`,
+  runtime `Node`, build command `npm install && npm run build`, start command
+  `npm start`, and health check path `/health`. Choose the Free instance if
+  desired.
+3. Add these environment variables in the Render service settings:
+   `MONGO_URI` (your MongoDB Atlas connection string), `JWT_SECRET` (a long,
+   random secret), `JWT_EXPIRES_IN=7d`, `NODE_ENV=production`, and
+   `CLIENT_URL` (the exact Vercel production URL, including `https://` and
+   with no trailing slash). Render provides the `PORT` variable automatically.
+4. In MongoDB Atlas, allow the Render service to connect under **Network
   Access**. Render's free service does not have a stable outbound IP, so
   allowing `0.0.0.0/0` is the simplest option but permits connection attempts
   from any IP; use strong database credentials and restrict access further
   if your hosting plan provides stable outbound IPs.
-4. Confirm `https://<your-render-service>.onrender.com/health` returns
+5. Confirm `https://<your-render-service>.onrender.com/health` returns
   `{"status":"ok"}`. The API base URL is
   `https://<your-render-service>.onrender.com/api`. Redeploy Vercel after
   changing `VITE_API_URL`; Vite embeds it into the built files.
@@ -206,77 +214,21 @@ sufficient; queries are always scoped to `{_id, owner: req.userId}`, and a
 cross-user access attempt returns 404 (not 403), so it doesn't even
 confirm another user's project exists.
 
-## Architectural decisions / trade-offs
+## Dashboard and security
 
-- **Dashboard aggregation is one `$facet` MongoDB pipeline**
-  (`server/src/services/dashboardService.ts`), not "fetch all projects,
-  reduce in JS." Small further arithmetic (cumulative totals, a naive
-  forecast, average completion days) runs only on the pre-aggregated
-  result set (≤12 rows), never on the full collection.
-- **Five dashboard sections are intentionally mock data, not real API
-  data:** Feature Usage, Customer Satisfaction, Conversion Funnel, Sales
-  Cycle, Support Tickets. The Figma reference is a generic SaaS-billing
-  product; PulseBoard's actual scope (per the FRD) is Users + Projects
-  only — there's no subscription, NPS-survey, sales-funnel, or ticketing
-  data model to back these honestly. They're clearly isolated in
-  `client/src/data/mockDashboardData.ts` and marked in-code in
-  `pages/Dashboard.tsx`, rather than either fabricating a data model
-  outside the FRD's scope or silently faking numbers as if real.
-- **The AI Insights panel is visual-only, by explicit design decision:**
-  it matches the Figma reference's layout/hover treatment, but its chat
-  input and action buttons are genuinely `disabled` (not just unwired) —
-  no message state, no send handler, no AI API, no backend endpoint.
-- **RevenueChart's "year" selector reflects reality:** real data is one
-  continuous activity series, not split by year, so it shows a plain
-  "Last 12 months" label instead of a dropdown with nothing real to
-  select.
-- **bcryptjs over bcrypt:** pure-JS, no native build step — avoids
-  node-gyp failures on free-tier hosts like Render.
+- Dashboard metrics, monthly project activity, recent activity, and
+  upcoming deadlines are loaded from the authenticated user's projects.
+  The server aggregates dashboard data in one MongoDB `$facet` pipeline.
+- Authentication uses a JWT in an httpOnly cookie. The API requires an
+  exact `CLIENT_URL` and credentialed CORS; production cookies use HTTPS
+  cross-site settings.
+- Project queries are scoped to the authenticated owner. A project ID alone
+  never grants access to another user's project.
+- Passwords are hashed with bcryptjs. Its pure-JavaScript implementation
+  avoids native build requirements on hosts such as Render.
 
 ## Known limitations
 
-- Built and verified in a sandboxed environment with **no outbound network
-  access** — `npm install` was attempted and genuinely fails here (network
-  policy blocks the registry: `403 host_not_allowed`), so nothing has been
-  through a real `npm install`, a real build, or a real MongoDB connection.
-  Everything was verified statically: import-path resolution (checked
-  programmatically, not by eye), cross-checking every API endpoint
-  path/response shape between frontend services and backend
-  controllers/routes line-by-line, and `tsc --noEmit` runs that catch
-  genuine syntax/logic errors but can't fully validate against real
-  installed type definitions. **Run `npm install` in both `client/` and
-  `server/`, then exercise the app in a real browser, before treating this
-  as verified.**
-- No ESLint configured — `npm run typecheck` is the only static check
-  wired up in either package.
-- `avgCompletionDays` is computed by the real API but not currently
-  displayed (the section that would show it, Sales Cycle, is one of the
-  five intentionally-mock sections above).
-- No automated test suite (unit/integration/e2e) — out of scope for the
-  time available; manual/static verification only.
-
-## Deployment
-
-Free-tier stack: **MongoDB Atlas** (M0) + **Render** (backend, free Web
-Service) + **Vercel** (frontend).
-
-1. **Atlas:** create the cluster, allow `0.0.0.0/0` in Network Access, get
-   the `mongodb+srv://` connection string.
-2. **Render:** New → Web Service → connect the repo → root directory
-   `server` → build command `npm install && npm run build` → start command
-   `npm start` → set `MONGO_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `NODE_ENV=production`,
-   and `CLIENT_URL` (your Vercel URL, once known) as environment variables.
-   Free-tier services spin down after 15 min idle — the first request
-   after that can take 30–60s.
-3. **Vercel:** New Project → import the repo → root directory `client` →
-   framework preset Vite → set `VITE_API_URL` to the Render URL + `/api`.
-4. Update Render's `CLIENT_URL` to the real Vercel URL once you have it
-   (circular dependency between the two — expected, just requires one
-   round-trip update).
-5. Cookies: `secure: true` and `sameSite: 'none'` only kick in when
-   `NODE_ENV=production` (already wired in `authController.ts`) — both
-   Render and Vercel serve over HTTPS, so this works without further
-   changes once `NODE_ENV` is set correctly.
-
-This hasn't been executed end-to-end in this environment (no network
-access) — the above is the intended path, not a confirmed one.
+- There is no automated test suite or ESLint configuration yet.
+- Free-tier Render services may spin down after inactivity, making the first
+  request after a pause slower.

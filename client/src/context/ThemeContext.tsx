@@ -10,7 +10,7 @@ interface ThemeContextValue {
 
 export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-const STORAGE_KEY = 'pulseboard-theme';
+const STORAGE_KEY = 'glasssaas-theme';
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'light';

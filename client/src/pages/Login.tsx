@@ -4,7 +4,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { Copy, Check } from 'lucide-react';
 
 interface LocationState {
   from?: { pathname: string };
@@ -20,7 +19,6 @@ export default function Login() {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [copiedCredential, setCopiedCredential] = useState<'email' | 'password' | null>(null);
 
   // Already signed in — no reason to show the login form.
   if (status === 'authenticated') {
@@ -56,42 +54,11 @@ export default function Login() {
     }
   }
 
-  async function copyCredential(type: 'email' | 'password', value: string) {
-    await navigator.clipboard.writeText(value);
-    setCopiedCredential(type);
-    window.setTimeout(() => setCopiedCredential(null), 1600);
-  }
-
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
       <Card padding="lg">
-        <h1 className="text-center text-display-md text-fg-primary">Log in to PulseBoard</h1>
+        <h1 className="text-center text-display-md text-fg-primary">Log in to GlassSaaS</h1>
         <p className="mt-1 text-center text-body-sm text-fg-secondary">Welcome back — enter your details below.</p>
-
-        <div className="mt-5 rounded-secondary border border-glass-secondary bg-background-tertiary p-3">
-          <p className="text-body-sm font-medium text-fg-primary">Demo account</p>
-          <div className="mt-2 flex flex-col gap-2">
-            {[
-              ['Email', 'demo@example.com', 'email'],
-              ['Password', '12345678', 'password'],
-            ].map(([label, value, type]) => (
-              <div key={type} className="flex items-center justify-between gap-3 rounded-quaternary bg-background-quaternary px-3 py-2">
-                <div className="min-w-0">
-                  <p className="text-caption text-fg-secondary">{label}</p>
-                  <p className="truncate text-body-sm text-fg-primary">{value}</p>
-                </div>
-                <button
-                  type="button"
-                  aria-label={`Copy demo ${label.toLowerCase()}`}
-                  className="shrink-0 rounded-quaternary p-1.5 text-fg-secondary transition-colors hover:bg-background-interactive-secondary-hover hover:text-fg-primary focus:outline-none focus:ring-2 focus:ring-focus-ring"
-                  onClick={() => void copyCredential(type as 'email' | 'password', value)}
-                >
-                  {copiedCredential === type ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
 
         <form className="mt-6 flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
           <Input

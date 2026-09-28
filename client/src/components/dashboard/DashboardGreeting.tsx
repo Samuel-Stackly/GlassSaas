@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { Calendar } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
 import { useAuth } from '@/hooks/useAuth';
 
 /**
@@ -34,26 +33,24 @@ export function DashboardGreeting() {
   const firstName = user?.name?.trim().split(/\s+/)[0];
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <header className="dashboard-greeting">
       <div className="min-w-0">
-        <p className="text-body-lg text-fg-secondary">{greeting},</p>
-        <p className="truncate text-display-lg text-fg-primary">{firstName ?? 'there'}</p>
-        <p className="mt-1 text-body-sm text-fg-secondary">Here's what's happening with your projects today.</p>
+        <p className="dashboard-greeting__eyebrow">WORKSPACE / OVERVIEW</p>
+        <h1 className="dashboard-greeting__title">
+          {greeting}, <span>{firstName ?? 'there'}.</span>
+        </h1>
+        <p className="dashboard-greeting__subtitle">Here’s what’s happening with your projects today.</p>
       </div>
 
-      <Card padding="md" className="flex shrink-0 items-center gap-3 sm:min-w-[260px]">
-        <div
-          aria-hidden="true"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-secondary text-white"
-          style={{ backgroundImage: 'var(--gradient-brand-mono)' }}
-        >
+      <div className="dashboard-date">
+        <span className="dashboard-date__icon" aria-hidden="true">
           <Calendar size={18} />
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-body-sm font-medium text-fg-primary">{dateLabel}</p>
-          <p className="truncate text-label-sm text-fg-secondary">Stay productive, keep building!</p>
-        </div>
-      </Card>
-    </div>
+        </span>
+        <span className="dashboard-date__text">
+          <span className="dashboard-date__label">TODAY</span>
+          <time dateTime={now.toISOString().slice(0, 10)}>{dateLabel}</time>
+        </span>
+      </div>
+    </header>
   );
 }

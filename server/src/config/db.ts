@@ -21,7 +21,7 @@ import dns from 'node:dns';
  *
  * Note the scope: `dns.setServers()` is process-global in Node — it affects
  * all DNS lookups this server process makes, not just MongoDB's. That's a
- * non-issue for PulseBoard today (no other outbound DNS-dependent calls
+ * non-issue for GlassSaaS today (no other outbound DNS-dependent calls
  * exist), but worth knowing if that ever changes.
  */
 function applyDevDnsWorkaroundIfEnabled(): void {

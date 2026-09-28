@@ -5,31 +5,66 @@ import { Logo } from '@/components/ui/Logo';
 
 export default function Landing() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex items-center justify-between px-6 py-5 sm:px-10">
-        <div className="flex items-center gap-2.5">
-          <Logo size={32} />
-          <span className="text-body-md font-semibold text-fg-primary">PulseBoard</span>
-        </div>
-        <ThemeToggle />
-      </header>
+    <div className="landing-page min-h-screen">
+      <main>
+        <section className="landing-hero">
+          <img
+            className="landing-hero__image"
+            src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=2400&q=85"
+            alt=""
+            aria-hidden="true"
+          />
+          <div className="landing-hero__veil" aria-hidden="true" />
 
-      <main className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center px-6 text-center">
-        <h1 className="text-display-lg text-fg-primary">See your projects clearly.</h1>
-        <p className="mt-4 max-w-md text-body-lg text-fg-secondary">
-          PulseBoard turns your projects into a real-time dashboard — status, activity, and deadlines, all in one
-          place.
-        </p>
-        <div className="mt-8 flex items-center gap-3">
-          <Link to="/register">
-            <Button size="md">Create a free account</Button>
-          </Link>
-          <Link to="/login">
-            <Button variant="secondary" size="md">
-              Log in
-            </Button>
-          </Link>
-        </div>
+          <header className="landing-header">
+            <Link to="/" className="landing-brand" aria-label="GlassSaaS home">
+              <Logo size={34} />
+              <span>GlassSaaS</span>
+            </Link>
+            <ThemeToggle />
+          </header>
+
+          <div className="landing-hero__content">
+            <p className="landing-eyebrow">PROJECT WORK, IN FOCUS</p>
+            <h1>GlassSaaS</h1>
+            <p className="landing-intro">
+              A clearer view of what is moving, what is due, and what needs your attention.
+            </p>
+            <div className="landing-actions">
+              <Link to="/register">
+                <Button size="md">Create your account</Button>
+              </Link>
+              <Link to="/login" className="landing-login-link">
+                Log in <span aria-hidden="true">&rarr;</span>
+              </Link>
+            </div>
+          </div>
+          <p className="landing-hero__index" aria-hidden="true">01 / PROJECT OVERVIEW</p>
+        </section>
+
+        <section className="landing-highlights" aria-label="GlassSaaS highlights">
+          <article className="landing-highlight">
+            <span className="landing-highlight__number">01</span>
+            <div>
+              <h2>Progress at a glance</h2>
+              <p>See active, completed, and overdue projects together.</p>
+            </div>
+          </article>
+          <article className="landing-highlight">
+            <span className="landing-highlight__number">02</span>
+            <div>
+              <h2>Activity that matters</h2>
+              <p>Follow recent work without digging through every project.</p>
+            </div>
+          </article>
+          <article className="landing-highlight">
+            <span className="landing-highlight__number">03</span>
+            <div>
+              <h2>Deadlines in view</h2>
+              <p>Keep upcoming dates visible while you plan the next move.</p>
+            </div>
+          </article>
+        </section>
       </main>
     </div>
   );
